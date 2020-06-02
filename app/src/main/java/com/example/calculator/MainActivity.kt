@@ -12,11 +12,14 @@ import androidx.appcompat.widget.AppCompatButton
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import java.lang.Math.abs
+import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity() {
 
     var clearText: Boolean = false;
     var eps: Double = 10e-12;
+    val operatorsList: List<String> = listOf("+", "-", "×", "÷");
+    val operatorsListWithDot: List<String> = listOf("+", "-", "×", "÷",".");
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -66,7 +69,24 @@ class MainActivity : AppCompatActivity() {
             textView.text = "";
             textView2.text = "";
         }
-        textView.text = textView.text.toString().plus((view as AppCompatButton).text.toString());
+        val simbol = (view as AppCompatButton).text.toString();
+        if (textView.text.isEmpty() && operatorsListWithDot.contains(simbol) && simbol != "-") {
+            textView.text = textView.text
+        } else {
+            if ((simbol == ".") && ((textView.text.last().toString()) == ".")) {
+                textView.text = textView.text
+            } else {
+                if (operatorsList.contains(simbol) && (!textView.text.isEmpty()) && (operatorsList.contains(
+                        textView.text.last().toString()
+                    ))
+                ) {
+                    textView.text =
+                        textView.text.substring(0, textView.text.lastIndex).plus(simbol);
+                } else {
+                    textView.text = textView.text.toString().plus(simbol);
+                }
+            }
+        }
     }
 
     fun String.intOrString(): Any {
@@ -82,20 +102,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun equalss(view: View) {
+        textView2.text = "";
         val res = parseExpr(textView.text.toString());
         if (res.toDouble().equals(Double.MAX_VALUE)) {
             textView2.text = textView2.text.toString().plus("= ").plus("на ноль делить нельзя");
         } else {
-            textView2.text = textView2.text.toString().plus("= ").plus(res.toString().intOrString());
+            textView2.text = textView2.text.toString().plus("= ").plus(BigDecimal(res).setScale(8,BigDecimal.ROUND_HALF_UP).toDouble().toString().intOrString());
         }
         clearText = true;
     }
 
     fun clear(view: View) {
         textView.text = "";
+        textView2.text = "";
     }
 
     fun deleteLaatSimble(view: View) {
+        if ((textView.text.lastIndex >= 0) && (textView2.text.isEmpty()))  {
+            textView.text = textView.text.substring(0, textView.text.lastIndex)
+        }
     }
 
 }
